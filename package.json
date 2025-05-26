@@ -1,0 +1,12 @@
+{
+  "name": "quick-notes-chrome-extension",
+  "version": "1.0.0",
+  "description": "A clean, distraction-free note-taking extension for Chrome",
+  "scripts": {
+    "generate-icons": "node generate_icons.js"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2"
+  },
+  "license": "MIT"
+} 

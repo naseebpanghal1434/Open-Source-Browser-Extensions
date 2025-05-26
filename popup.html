@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Quick Notes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Quick Notes</div>
+      <div class="controls">
+        <button id="clearBtn" title="Clear note">🗑️</button>
+        <div id="saveStatus" class="save-status">Saved</div>
+      </div>
+    </div>
+    
+    <div class="editor-container">
+      <textarea id="noteEditor" placeholder="Start typing your note here..."></textarea>
+    </div>
+    
+    <div class="footer">
+      <div class="stats">
+        <span id="charCount">0 characters</span>
+        <span id="wordCount">0 words</span>
+      </div>
+      <div id="lastModified" class="timestamp">Last modified: Never</div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 
