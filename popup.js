@@ -2,6 +2,21 @@
 const DEBOUNCE_DELAY = 500; // ms
 const STORAGE_KEY_PREFIX = 'quick_notes_';
 
+// Utility: Extract root domain from a URL
+function getRootDomain(url) {
+  try {
+    const u = new URL(url);
+    // Remove subdomains, keep only the root domain
+    const parts = u.hostname.split('.');
+    if (parts.length > 2) {
+      return parts.slice(-2).join('.');
+    }
+    return u.hostname;
+  } catch (e) {
+    return url;
+  }
+}
+
 // DOM Elements
 const noteEditor = document.getElementById('noteEditor');
 const charCount = document.getElementById('charCount');
@@ -9,17 +24,26 @@ const wordCount = document.getElementById('wordCount');
 const lastModified = document.getElementById('lastModified');
 const saveStatus = document.getElementById('saveStatus');
 const clearBtn = document.getElementById('clearBtn');
+const floatBtn = document.getElementById('floatBtn');
+const expandBtn = document.getElementById('expandBtn');
+const manageBtn = document.getElementById('manageBtn');
 
 // State
 let currentUrl = '';
+let currentDomain = '';
 let saveTimeout = null;
 let isSaving = false;
+let perDomain = true;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   // Get current tab URL
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   currentUrl = tab.url;
+  currentDomain = getRootDomain(currentUrl);
+  // Get perDomain setting
+  const settings = await chrome.storage.sync.get(['perDomain']);
+  perDomain = settings.perDomain !== undefined ? settings.perDomain : true;
   
   // Load existing note
   await loadNote();
@@ -41,6 +65,15 @@ function setupEventListeners() {
   
   // Clear button
   clearBtn.addEventListener('click', handleClear);
+  
+  // Floating note button
+  floatBtn.addEventListener('click', () => handleFloatingNote('normal'));
+  expandBtn.addEventListener('click', () => handleFloatingNote('expanded'));
+  
+  // Manage button
+  manageBtn.addEventListener('click', () => {
+    window.open('manage.html');
+  });
   
   // Window close
   window.addEventListener('unload', () => {
@@ -89,10 +122,22 @@ async function handleClear() {
   }
 }
 
+// Floating Note Handler
+async function handleFloatingNote(size) {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.tabs.sendMessage(tab.id, { action: 'showNoteOverlay', size });
+    window.close(); // Close the popup after opening the floating note
+  } catch (error) {
+    console.error('Error opening floating note:', error);
+    showError('Failed to open floating note');
+  }
+}
+
 // Storage Functions
 async function loadNote() {
   try {
-    const key = STORAGE_KEY_PREFIX + currentUrl;
+    const key = 'quick_notes_' + (perDomain ? currentDomain : currentUrl);
     const result = await chrome.storage.local.get(key);
     const note = result[key];
     
@@ -115,7 +160,7 @@ async function saveNote() {
   saveStatus.textContent = 'Saving...';
   
   try {
-    const key = STORAGE_KEY_PREFIX + currentUrl;
+    const key = 'quick_notes_' + (perDomain ? currentDomain : currentUrl);
     const note = {
       content: noteEditor.value,
       timestamp: Date.now()

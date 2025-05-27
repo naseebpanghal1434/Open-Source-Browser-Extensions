@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Notes - Quick Notes</title>
+  <link rel="stylesheet" href="manage.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Manage Notes</h1>
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Search notes by domain or content...">
+      <button id="exportBtn">Export Notes</button>
+      <button id="importBtn">Import Notes</button>
+      <button id="clearAllBtn">Clear All Notes</button>
+    </div>
+    <div id="notesList"></div>
+    <div class="settings-title-row">
+      <h2>Settings</h2>
+      <span id="reloadIcon" title="Reload" class="reload-icon">🔄</span>
+    </div>
+    <div class="settings">
+      <label><input type="checkbox" id="perDomainToggle"> Save notes per root domain (not per page)</label><br>
+      <label>Default overlay size:
+        <select id="overlaySizeSelect">
+          <option value="normal">Normal</option>
+          <option value="expanded">Expanded</option>
+        </select>
+      </label><br>
+      <label>Theme:
+        <select id="themeSelect">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <input type="file" id="importFileInput" style="display:none" accept="application/json">
+  <script src="manage.js"></script>
+</body>
+</html> 
