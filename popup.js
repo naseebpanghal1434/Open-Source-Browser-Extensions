@@ -126,11 +126,41 @@ async function handleClear() {
 async function handleFloatingNote(size) {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    await chrome.tabs.sendMessage(tab.id, { action: 'showNoteOverlay', size });
+    if (!tab || !tab.id) {
+      throw new Error('No active tab found');
+    }
+
+    // Check if we can inject content script
+    if (!tab.url.startsWith('http')) {
+      throw new Error('Cannot open floating note on this page type');
+    }
+
+    // Try to inject content script if not already present
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js']
+      });
+    } catch (error) {
+      // Ignore error if script is already injected
+      console.log('Content script may already be present:', error);
+    }
+    
+    console.log('Sending showNoteOverlay message to tab:', tab.id);
+    const response = await chrome.tabs.sendMessage(tab.id, { 
+      action: 'showNoteOverlay', 
+      size,
+      showExpandControls: true // Always show expand controls
+    });
+    
+    if (!response || !response.success) {
+      throw new Error(response?.error || 'Failed to show floating note');
+    }
+    
     window.close(); // Close the popup after opening the floating note
   } catch (error) {
     console.error('Error opening floating note:', error);
-    showError('Failed to open floating note');
+    showError(`Failed to open floating note: ${error.message}`);
   }
 }
 

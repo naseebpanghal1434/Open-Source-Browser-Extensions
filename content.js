@@ -223,14 +223,42 @@ function createNoteOverlay(tabUrl, sizeMode = 'normal', showExpandControls = fal
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'showNoteOverlay') {
-        let overlay = document.getElementById('quick-notes-overlay-host');
-        if (!overlay) {
-            // Get the current tab URL from the sender (content script runs in the tab)
-            const tabUrl = window.location.href;
-            const showExpandControls = request.size === 'expanded';
-            overlay = createNoteOverlay(tabUrl, request.size, showExpandControls);
+        try {
+            console.log('Received showNoteOverlay message:', request);
+            let overlay = document.getElementById('quick-notes-overlay-host');
+            if (!overlay) {
+                console.log('Creating new overlay');
+                // Get the current tab URL from the sender (content script runs in the tab)
+                const tabUrl = window.location.href;
+                const showExpandControls = request.showExpandControls || request.size === 'expanded';
+                overlay = createNoteOverlay(tabUrl, request.size, showExpandControls);
+            } else {
+                // If overlay exists, update its size if needed
+                const shadow = overlay.shadowRoot;
+                if (shadow) {
+                    const expandBtn = shadow.getElementById('expandBtn');
+                    const shrinkBtn = shadow.getElementById('shrinkBtn');
+                    if (expandBtn && shrinkBtn) {
+                        if (request.size === 'expanded') {
+                            expandBtn.click();
+                        } else {
+                            shrinkBtn.click();
+                        }
+                    }
+                }
+            }
+            if (overlay) {
+                console.log('Showing overlay');
+                overlay.style.display = 'block';
+                sendResponse({ success: true });
+            } else {
+                console.error('Failed to create overlay');
+                sendResponse({ success: false, error: 'Failed to create overlay' });
+            }
+        } catch (error) {
+            console.error('Error in showNoteOverlay:', error);
+            sendResponse({ success: false, error: error.message });
         }
-        overlay.style.display = 'block';
-        sendResponse({ success: true });
+        return true; // Keep the message channel open for async response
     }
 }); 
