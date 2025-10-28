@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Quick Notes",
-  "version": "1.0",
-  "description": "Take notes on any webpage with a clean, distraction-free interface",
+  "version": "2.0",
+  "description": "Organize your tasks and notes with tabbed interface - MITs, daily tasks, EOD notes, and quick notes all in one place",
   "permissions": [
     "storage",
     "activeTab",
